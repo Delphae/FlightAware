@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#    ____       _       _
-#   |  _ \  ___| |_ __ | |__   __ _  ___
-#   | | | |/ _ \ | '_ \| '_ \ / _` |/ _ \
-#   | |_| |  __/ | |_) | | | | (_| |  __/
-#   |____/ \___|_| .__/|_| |_|\__,_|\___|
-#                |_|
+'''
+    ____       _       _
+   |  _ \  ___| |_ __ | |__   __ _  ___
+   | | | |/ _ \ | '_ \| '_ \ / _` |/ _ \
+   | |_| |  __/ | |_) | | | | (_| |  __/
+   |____/ \___|_| .__/|_| |_|\__,_|\___|
+                |_|
+'''
 
+VERSION = '1.2'
+DATE    = '2018-12-01'
 
 import requests
 from datetime import datetime as dt
 
-__version__ = "1.1"
-__date__    = "2018-12-01"
 
 def readjson(method, params, auth):
     url = "https://flightxml.flightaware.com/json/FlightXML3/"
@@ -21,10 +23,10 @@ def readjson(method, params, auth):
 #    print response.url
     return response.json()
 
-
 class FlightResult:
     def __init__(self, result=dict()):
         self.__dict__ = result
+
 
 class FlightInfo:
     def __init__(self, info=dict()):
@@ -40,6 +42,19 @@ class FlightInfo:
         self.destination_airport = self.destination['airport_name']
     def __repr__(self):
         return self.faFlightID
+    
+    def __str__(self):
+        try:
+            origincity = self.origin['city']
+            destincity = self.destination['city']
+            return '%-3s %-5s %5s %-25s %5s %s' % (self.airline_iata,
+                                       self.flightnumber,
+                                       str(self.ADT.time())[:-3],
+                                       origincity.encode('iso-8859-1'),
+                                       str(self.AAT.time())[:-3],
+                                       destincity.encode('iso-8859-1'))
+        except:
+            return ''
 
 
 class FlightRoute:
@@ -51,6 +66,9 @@ class FlightRoute:
 
 
 class FlightAware(object):
+    __version__ = VERSION
+    __date__    = DATE
+
     def __init__(self, username, apikey):
         self.auth     = (username,apikey)
     
@@ -78,4 +96,15 @@ class FlightAware(object):
         self.km    = self.miles * 1.609344
         return FlightResult({'miles':self.miles, 'km':self.km})
         
-
+    def AirportBoards(self, airport):      
+        result = readjson('AirportBoards', {'airport_code':airport}, self.auth)
+        boards = result['AirportBoardsResult']
+        arrivals   = [FlightInfo(flight) for flight in boards['arrivals']['flights']]
+        departures = [FlightInfo(flight) for flight in boards['departures']['flights']]
+        enroute    = [FlightInfo(flight) for flight in boards['enroute']['flights']]
+        scheduled  = [FlightInfo(flight) for flight in boards['scheduled']['flights']]
+        resultdict = dict(arrivals=arrivals,
+                          departures=departures,
+                          enroute=enroute,
+                          scheduled=scheduled)
+        return FlightResult(resultdict)
