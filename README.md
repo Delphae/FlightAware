@@ -23,13 +23,14 @@ from FlightPy import FlightAware
 FA = FlightAware(USERNAME,APIKEY)
 ```
 
-The current version of FlightPy returns information about:
+The current version of FlightPy returns FlightAware information with:
 <nl>
-    <li>airport</li>
-    <li>airline</li>
-    <li>routeinfo</li>
-    <li>flightinfo</li>
-    <li>latlondistance</li>
+    <li>method AirportInfo</li>
+    <li>method AirlineInfo</li>
+    <li>method FlightInfoStatus</li>
+    <li>method LatLongsToDistance</li>
+    <li>method RoutesBetweenAirports</li>
+    <li>method AirportBoards</li>
 </nl>
 
 Please read FlightPy_Examples.ipynb with useful examples.
