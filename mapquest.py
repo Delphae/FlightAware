@@ -8,7 +8,7 @@ https://developer.mapquest.com
 
 '''
 import requests
-APIKEY = 'NOwxJonypq7z92AZbftbATxhyrOpzBGF'
+APIKEY = 'NOwxJoFrEFq7z92AZbftbATxhyrOpzBGF'
 MAXRESULTS = 10
 
 city = 'Amsterdam'
