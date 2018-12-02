@@ -13,12 +13,12 @@
 1.2  2018-12-01   AirportBoards
 1.3  2018-12-02   validate username & apikey
                   WeatherConditions
-
+1.4               TailOwner
 
 
 '''
 
-VERSION = '1.3'
+VERSION = '1.4'
 DATE    = '2018-12-02'
 
 import requests, json
@@ -29,7 +29,7 @@ def readjson(method, params, auth):
     url = "https://flightxml.flightaware.com/json/FlightXML3/"
     response = requests.get(url+method, params=params, auth=auth)
 #    print response.url
-    print response.status_code
+#    print response.status_code
     return response.json()
 
 class FlightResult:
@@ -131,3 +131,7 @@ class FlightAware(object):
         result = readjson('WeatherConditions', {'airport_code':airport}, self.auth)
         conditionsresult = result['WeatherConditionsResult']['conditions']
         return [FlightResult(condition) for condition in conditionsresult ]
+
+    def TailOwner(self, ident): 
+        result = readjson('TailOwner', {'ident':ident}, self.auth)
+        return FlightResult(result['TailOwnerResult'])
