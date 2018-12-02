@@ -8,12 +8,20 @@
    | |_| |  __/ | |_) | | | | (_| |  __/
    |____/ \___|_| .__/|_| |_|\__,_|\___|
                 |_|
+
+1.1  2018-11-30   initial version
+1.2  2018-12-01   AirportBoards
+1.3  2018-12-02   validate username & apikey
+                  WeatherConditions
+
+
+
 '''
 
-VERSION = '1.2'
-DATE    = '2018-12-01'
+VERSION = '1.3'
+DATE    = '2018-12-02'
 
-import requests
+import requests, json
 from datetime import datetime as dt
 
 
@@ -21,6 +29,7 @@ def readjson(method, params, auth):
     url = "https://flightxml.flightaware.com/json/FlightXML3/"
     response = requests.get(url+method, params=params, auth=auth)
 #    print response.url
+    print response.status_code
     return response.json()
 
 class FlightResult:
@@ -69,8 +78,17 @@ class FlightAware(object):
     __version__ = VERSION
     __date__    = DATE
 
-    def __init__(self, username, apikey):
-        self.auth     = (username,apikey)
+    def __init__(self, username='', apikey=''):
+        if not username or not apikey:
+             conf = json.load(open('flightaware.json'))
+             username = conf['username']
+             apikey   = conf['apikey']
+        self.auth = (username,apikey)
+        
+        url = "https://flightxml.flightaware.com/json/FlightXML3/WeatherConditions"
+        params = {'airport_code':'AMS'}
+        response = requests.get(url, params=params, auth=self.auth)
+        print ('%s %s' % (response.status_code, response.reason))
     
     def AirportInfo(self, airport):
         result = readjson('AirportInfo', {'airport_code':airport}, self.auth)
@@ -108,3 +126,8 @@ class FlightAware(object):
                           enroute=enroute,
                           scheduled=scheduled)
         return FlightResult(resultdict)
+    
+    def WeatherConditions(self, airport):
+        result = readjson('WeatherConditions', {'airport_code':airport}, self.auth)
+        conditionsresult = result['WeatherConditionsResult']['conditions']
+        return [FlightResult(condition) for condition in conditionsresult ]
